@@ -1,0 +1,41 @@
+theme = "main-theme"
+base_url = "https://blog.svistoun.com"
+title = "Igor\u2019s Blog"
+
+compile_sass = true
+build_search_index = true
+generate_feeds = true
+feed_filenames = ["rss.xml"]
+author = "Igor Svistoun"
+
+taxonomies = [
+    { name = "tags", feed = true },
+    { name = "categories", feed = true, paginate_by = 5 },
+]
+
+[markdown]
+highlight_code = true
+highlight_theme = "monokai"
+render_emoji = true
+bottom_footnotes = true
+
+[extra]
+close_responsive_menu_on_resize = true
+copy_button = true
+layout = "center"
+show_default_author = false
+
+main_menu = [
+    { name = "blog", url = "blog", trailing_slash = true },
+    { name = "tags", url = "tags", trailing_slash = true },
+    { name = "rss", url = "rss.xml" },
+]
+
+socials = [
+    { name = "github", url = "https://github.com/svistoi" },
+    { name = "linkedin", url = "https://www.linkedin.com/in/igor-s-0248aba9/" },
+]
+
+[extra.responsive_images]
+widths = [640, 784, 1280, 1920, 2560]
+fallback_width = 1280

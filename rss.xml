@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+      <title>Igor’s Blog</title>
+      <link>https://blog.svistoun.com</link>
+      <description></description>
+      <generator>Zola</generator>
+      <language>en</language>
+      <atom:link href="https://blog.svistoun.com/rss.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Sun, 21 Sep 2025 00:00:00 +0000</lastBuildDate>
+      <item>
+          <title>Previewing ZFS Anyraid With nix</title>
+          <pubDate>Sun, 21 Sep 2025 00:00:00 +0000</pubDate>
+          <author>Igor Svistoun</author>
+          <link>https://blog.svistoun.com/blog/nix-anyraid/</link>
+          <guid>https://blog.svistoun.com/blog/nix-anyraid/</guid>
+          <description xml:base="https://blog.svistoun.com/blog/nix-anyraid/">&lt;p&gt;Klara Systems is in the process of upstreaming a new ZFS vdev type.&lt;&#x2F;p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Anyraid allows devices of mismatched sizes to be combined together into a
+single top-level vdev. In the current version, Anyraid only supports
+mirror-type parity, but raidz-type parity is planned for the near future.
+-- &lt;cite&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;openzfs&#x2F;zfs&#x2F;pull&#x2F;17567&quot;&gt;OpenZFS PR&lt;&#x2F;a&gt;&lt;&#x2F;cite&gt;&lt;&#x2F;p&gt;
+&lt;&#x2F;blockquote&gt;
+&lt;p&gt;This may take a while to merge and get released, but I&#x27;m excited to try this out.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;building-with-nix&quot;&gt;Building With Nix&lt;a class=&quot;post-anchor&quot; href=&quot;#building-with-nix&quot; aria-label=&quot;Anchor link for: building-with-nix&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;#&lt;&#x2F;span&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;p&gt;nixpkgs packages several versions of zfs in the following manner&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#272822;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span&gt;tree pkgs&#x2F;os-specific&#x2F;linux&#x2F;zfs&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;pkgs&#x2F;os-specific&#x2F;linux&#x2F;zfs&#x2F;
+&lt;&#x2F;span&gt;&lt;span&gt;├── 2_2.nix
+&lt;&#x2F;span&gt;&lt;span&gt;├── 2_3.nix
+&lt;&#x2F;span&gt;&lt;span&gt;├── generic.nix
+&lt;&#x2F;span&gt;&lt;span&gt;└── unstable.nix
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;generic.nix provides a function to compile zfs, and 2_2.nix, 2_3.nix and unstable.nix call this function supplying the hash.&lt;&#x2F;p&gt;
+&lt;p&gt;So I could just:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;modify generic.nix to accept github owner and repository as argument since it&#x27;s hard-coded to openzfs project&lt;&#x2F;li&gt;
+&lt;li&gt;fix the fact that master branch renamed arc_summary to zarcsummary&lt;&#x2F;li&gt;
+&lt;li&gt;add anyraid.nix with customized parameters&lt;&#x2F;li&gt;
+&lt;li&gt;add &lt;code&gt;zfs_anyraid&lt;&#x2F;code&gt; package wherever &lt;code&gt;zfs_unstable&lt;&#x2F;code&gt; is defined&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;See &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;NixOS&#x2F;nixpkgs&#x2F;compare&#x2F;master...svistoi:nixpkgs:anyraid&quot;&gt;diff&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;nixos-integration-testing&quot;&gt;NixOS Integration Testing&lt;a class=&quot;post-anchor&quot; href=&quot;#nixos-integration-testing&quot; aria-label=&quot;Anchor link for: nixos-integration-testing&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;#&lt;&#x2F;span&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;p&gt;nixpkgs contains some zfs tests, though none for anyraid vdev.  However for sanity checking that it builds, I wanted to run the tests&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#272822;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span&gt;nix run .#nixosTests.zfs.anyraid.driver
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;h1 id=&quot;deploying-to-a-server&quot;&gt;Deploying To A Server&lt;a class=&quot;post-anchor&quot; href=&quot;#deploying-to-a-server&quot; aria-label=&quot;Anchor link for: deploying-to-a-server&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;#&lt;&#x2F;span&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;p&gt;I then configure my fork as flake input &lt;code&gt;nixpkgs-anyraid.url = &quot;github:svistoi&#x2F;nixpkgs&#x2F;anyraid&quot;;&lt;&#x2F;code&gt; and build a server nixosConfigurations&lt;&#x2F;p&gt;
+&lt;p&gt;with following options&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;nix&quot; style=&quot;background-color:#272822;color:#f8f8f2;&quot; class=&quot;language-nix &quot;&gt;&lt;code class=&quot;language-nix&quot; data-lang=&quot;nix&quot;&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;boot&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;kernelPackages &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#f92672;color:#f8f8f0;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;lib&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;mkForce pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;linuxKernel&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;packages&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;linux_6_16&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#f92672;color:#f8f8f0;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;boot&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;zfs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;package &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#f92672;color:#f8f8f0;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;lib&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;mkForce pkgs&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;zfs_anyraid&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#f92672;color:#f8f8f0;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;boot&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;supportedFilesystems &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#f92672;color:#f8f8f0;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; [&lt;&#x2F;span&gt;&lt;span style=&quot;color:#e6db74;&quot;&gt;&amp;quot;zfs&amp;quot;&lt;&#x2F;span&gt;&lt;span&gt;]&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#f92672;color:#f8f8f0;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;networking&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;.&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt;hostId &lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#f92672;color:#f8f8f0;&quot;&gt;=&lt;&#x2F;span&gt;&lt;span&gt; &lt;&#x2F;span&gt;&lt;span style=&quot;color:#e6db74;&quot;&gt;&amp;quot;67262970&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;background-color:#f92672;color:#f8f8f0;&quot;&gt;;&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;The server configuration is out of scope of this.  I&#x27;ve learned a lot about about flake layouts from some notable repositories:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;https:&#x2F;&#x2F;github.com&#x2F;MatthewCroughan&#x2F;nixcfg&lt;&#x2F;li&gt;
+&lt;li&gt;https:&#x2F;&#x2F;github.com&#x2F;wimpysworld&#x2F;nix-config&lt;&#x2F;li&gt;
+&lt;li&gt;https:&#x2F;&#x2F;github.com&#x2F;srid&#x2F;nixos-config&lt;&#x2F;li&gt;
+&lt;li&gt;https:&#x2F;&#x2F;github.com&#x2F;jakehamilton&#x2F;config&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h1 id=&quot;creating-a-pool-with-anyraid-vdev&quot;&gt;Creating A Pool With Anyraid vdev&lt;a class=&quot;post-anchor&quot; href=&quot;#creating-a-pool-with-anyraid-vdev&quot; aria-label=&quot;Anchor link for: creating-a-pool-with-anyraid-vdev&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;#&lt;&#x2F;span&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;h1&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#272822;color:#f8f8f2;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span&gt;zpool create&lt;&#x2F;span&gt;&lt;span style=&quot;font-style:italic;color:#fd971f;&quot;&gt; -f&lt;&#x2F;span&gt;&lt;span&gt; tank anyraid &lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;&amp;lt;&lt;&#x2F;span&gt;&lt;span&gt;list of devices&lt;&#x2F;span&gt;&lt;span style=&quot;color:#f92672;&quot;&gt;&amp;gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</description>
+      </item>
+    </channel>
+</rss>

@@ -3,6 +3,7 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    nixpkgs-zola.url = "github:NixOS/nixpkgs/a50ab42bfe17b6cb772d43a8b9c8fef9d650c556";
     theme = {
       url = "github:ebkalderon/terminus";
       flake = false;
@@ -10,7 +11,12 @@
   };
 
   outputs =
-    { self, nixpkgs, ... }@inputs:
+    {
+      self,
+      nixpkgs,
+      nixpkgs-zola,
+      ...
+    }@inputs:
     let
       forAllSystems =
         function:
@@ -19,14 +25,21 @@
           "aarch64-linux"
           "x86_64-linux"
         ] (system: function nixpkgs.legacyPackages.${system});
+      zolaForAllSystems =
+        function:
+        nixpkgs.lib.genAttrs [
+          "aarch64-darwin"
+          "aarch64-linux"
+          "x86_64-linux"
+        ] (system: function nixpkgs-zola.legacyPackages.${system});
     in
     {
       packages = forAllSystems (pkgs: {
         default = pkgs.stdenv.mkDerivation {
           name = "static-website";
           src = self;
-          nativeBuildInputs = with pkgs; [
-            zola
+          nativeBuildInputs = [
+            (zolaForAllSystems (p: p.zola)).${pkgs.system}
           ];
 
           buildPhase = ''
@@ -44,12 +57,12 @@
 
       devShells = forAllSystems (pkgs: {
         default = pkgs.mkShell {
-          packages = with pkgs; [
-            zola
+          packages = [
+            (zolaForAllSystems (p: p.zola)).${pkgs.system}
           ];
           shellHook = ''
             mkdir -p themes
-            ln -s ${inputs.theme} themes/main-theme
+            ln -sfn ${inputs.theme} themes/main-theme
           '';
         };
       });

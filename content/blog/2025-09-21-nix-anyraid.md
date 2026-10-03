@@ -33,7 +33,7 @@ generic.nix provides a function to compile zfs, and 2_2.nix, 2_3.nix and unstabl
 
 So I could just:
 - modify generic.nix to accept github owner and repository as argument since it's hard-coded to openzfs project
-- fix the fact that master branch renamed arc_summary to zarcsummary 
+- fix the fact that master branch renamed arc_summary to zarcsummary
 - add anyraid.nix with customized parameters
 - add `zfs_anyraid` package wherever `zfs_unstable` is defined
 
@@ -52,6 +52,7 @@ nix run .#nixosTests.zfs.anyraid.driver
 I then configure my fork as flake input `nixpkgs-anyraid.url = "github:svistoi/nixpkgs/anyraid";` and build a server nixosConfigurations
 
 with following options
+
 ```nix
 boot.kernelPackages = lib.mkForce pkgs.linuxKernel.packages.linux_6_16;
 boot.zfs.package = lib.mkForce pkgs.zfs_anyraid;
@@ -60,6 +61,7 @@ networking.hostId = "67262970";
 ```
 
 The server configuration is out of scope of this.  I've learned a lot about about flake layouts from some notable repositories:
+
 - https://github.com/MatthewCroughan/nixcfg
 - https://github.com/wimpysworld/nix-config
 - https://github.com/srid/nixos-config

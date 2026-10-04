@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://blog.svistoun.com/</loc>
+    </url>
+    <url>
+        <loc>https://blog.svistoun.com/blog/</loc>
+    </url>
+    <url>
+        <loc>https://blog.svistoun.com/blog/nix-anyraid/</loc>
+        <lastmod>2025-09-21</lastmod>
+    </url>
+    <url>
+        <loc>https://blog.svistoun.com/blog/page/1/</loc>
+    </url>
+    <url>
+        <loc>https://blog.svistoun.com/categories/</loc>
+    </url>
+    <url>
+        <loc>https://blog.svistoun.com/tags/</loc>
+    </url>
+    <url>
+        <loc>https://blog.svistoun.com/tags/nix/</loc>
+    </url>
+    <url>
+        <loc>https://blog.svistoun.com/tags/zfs/</loc>
+    </url>
+</urlset>

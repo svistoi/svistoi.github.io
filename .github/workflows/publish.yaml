@@ -21,3 +21,4 @@ jobs:
           publish_dir: ./result
           publish_branch: gh-pages
           force_orphan: true
+          cname: blog.svistoun.com

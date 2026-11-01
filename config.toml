@@ -14,10 +14,11 @@ taxonomies = [
 ]
 
 [markdown]
-highlight_code = true
-highlight_theme = "monokai"
 render_emoji = true
 bottom_footnotes = true
+
+[markdown.highlighting]
+theme = "monokai"
 
 [extra]
 close_responsive_menu_on_resize = true
